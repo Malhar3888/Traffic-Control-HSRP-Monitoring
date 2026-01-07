@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   Video,
+  Scan,
   AlertTriangle,
   Car,
   Camera,
@@ -38,6 +39,11 @@ const navItems: NavItem[] = [
     name: 'Live Feeds',
     path: '/live-feeds',
     icon: <Video className="w-5 h-5" />,
+  },
+  {
+    name: 'Live HSRP Detection',
+    path: '/live-detection',
+    icon: <Scan className="w-5 h-5" />,
   },
   {
     name: 'Violations',

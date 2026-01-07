@@ -1,172 +1,187 @@
-# AI-Powered Traffic Surveillance & HSRP Compliance Monitoring System Requirements Document
+# Real-Time HSRP Number Plate Detection using Laptop Camera Requirements Document
 
 ## 1. Application Overview
 
-### 1.1 Application Name
-AI-Powered Traffic Surveillance & HSRP Compliance Monitoring System
+### 1.1 Application Name\nReal-Time HSRP Number Plate Detection using Laptop Camera
 
 ### 1.2 Application Description
-A full-stack, production-grade web platform designed for Traffic Police, RTO, and Smart City Authorities to automatically detect Indian vehicles from traffic CCTV feeds, verify HSRP number plates and RTO compliance, and send WhatsApp fines/warnings in real time.
+A real-time AI-powered web application that accesses the user's laptop webcam to detect Indian vehicle number plates and verify HSRP compliance instantly. Users can point their camera toward a bike or car number plate and receive immediate feedback on vehicle number, HSRP status, plate validity, and confidence scores with visual bounding boxes.
 
 ### 1.3 Target Users
 - Traffic Police Officers
 - RTO Officials
-- Smart City Authority Personnel
-- System Administrators
+- Vehicle Owners
+- General Public
+- Law Enforcement Personnel
 
 ## 2. Core Functionalities
 
-### 2.1 Live Traffic Video Processing
-- Capture live traffic CCTV video streams via RTSP protocol
-- Support multiple IP camera feeds simultaneously
-- Real-time video processing pipeline
+### 2.1 Webcam Access Module
+- Access laptop webcam using WebRTC / getUserMedia() API
+- Stream frames to backend at 10-15 FPS
+- Display live camera preview in browser
+- Support for multiple camera devices
 
-### 2.2 AI-Powered Vehicle Detection
-- Detect vehicles in real time using YOLOv8:\n  - Cars
+### 2.2 Real-Time AI Detection Pipeline
+\nProcessing flow for every frame:
+```
+Webcam Frame\n    ↓
+YOLOv8 → Vehicle Detection\n    ↓
+YOLOv8 → Number Plate Detection
+    ↓
+OCR (EasyOCR / PaddleOCR)
+    ↓
+HSRP CNN Classifier
+    ↓\nResult Overlay
+```\n
+### 2.3 Vehicle Detection
+- Real-time vehicle detection using YOLOv8\n- Detect vehicle types:
+  - Cars
   - Bikes
   - Trucks
-  - Buses
-- Extract number plate regions from detected vehicles
-\n### 2.3 Number Plate Recognition
-- OCR extraction using EasyOCR or PaddleOCR
-- Extract Indian number plate format (e.g., MH12AB3456)
-\n### 2.4 HSRP Verification
+  - Buses\n\n### 2.4 Number Plate Detection
+- Extract number plate regions from detected vehicles using YOLOv8
+- Draw bounding boxes around detected plates
+\n### 2.5 OCR Number Plate Recognition
+- Extract Indian number plate text using EasyOCR or PaddleOCR
+- Support Indian number plate format (e.g., MH12AB3456)
+- Display detected plate number on live feed
+
+### 2.6 HSRP Classification
 - CNN model to classify HSRP vs Non-HSRP plates
-- Detect HSRP features:\n  - Blue IND strip\n  - Hologram
-  - Laser-engraved code
+- Detection criteria:
+  - Blue IND band
+  - Hologram presence
+  - Laser-etched code
+- Output classification:\n  - ✅ Valid HSRP Plate
+  - ❌ Non-HSRP Plate
 
-### 2.5 RTO Database Verification
-- Mock RTO database API integration
-- Fetch vehicle information:\n  - Vehicle number
-  - Owner name
-  - Phone number
-  - RC expiry date
-  - Insurance expiry date
-  - PUC expiry date
-  - HSRP status
+### 2.7 Live Output Overlay
+\nDisplay on camera feed:
+- Bounding box on detected number plate
+- Detected plate number (e.g., MH12AB3456)
+- HSRP Status:
+  - ✅ Valid
+  - ❌ Non-HSRP / Missing
+- Confidence percentage
 
-### 2.6 Violation Detection Engine
-- Automatic violation rule processing:\n  - No HSRP: Fine ₹5000
-  - Insurance expired: Warning
-  - PUC expired: Fine
-  - RC expired: High risk alert
-- Generate violation records with:
+Example overlay format:
+```
+MH12AB3456
+HSRP: ❌ Missing
+Confidence: 92%
+```
+
+### 2.8 Detection Log
+- Maintain log of all detected vehicles
+- Record information:
   - Plate number
-  - Date and time
-  - Camera location\n  - Vehicle image
-  - Rule broken
-  - Fine amount
-
-### 2.7 WhatsApp Notification System
-- Integration with Twilio or WhatsApp Business API
-- Automated fine/warning messages
-- Message format example: Your vehicle MH12AB3456 was detected without HSRP at MG Road, Pune at 10:42 AM. Fine ₹5000. Please pay within 7 days.
-
-### 2.8 Admin Dashboard\n- Live violation feed display
-- Multi-camera view interface
-- Vehicle image gallery
-- Search functionality by number plate
-- Fine status tracking\n- Payment status monitoring
-- Violation heatmap visualization
-- PDF export capability
-
-### 2.9 Security & Access Control
-- JWT authentication
-- HTTPS encryption for all APIs
-- Comprehensive access logging
-- Role-based access control:\n  - Admin\n  - Officer
-  - Viewer
-- Secure RTO data handling
+  - Timestamp
+  - HSRP status
+  - Confidence score
+  - Screenshot\n
+### 2.9 Screenshot Capture
+- Capture button to save current frame
+- Save detection results with overlay
+- Download captured images
 
 ## 3. Technical Architecture
 
-### 3.1 System Pipeline
-```
-IP CCTV (RTSP)
-      ↓
-AI Video Processor (YOLOv8)\n      ↓
-Number Plate Recognition (OCR)
-      ↓
-HSRP Verification Model
-      ↓
-RTO & Insurance API
-      ↓\nViolation Engine
-      ↓
-WhatsApp Gateway
-      ↓\nAdmin Dashboard
-```
+### 3.1 Technology Stack
+\n| Layer | Technology |
+|-------|------------|
+| Frontend | React / HTML + JS |
+| Camera | WebRTC |
+| Backend | Python (FastAPI / Flask) |
+| AI | YOLOv8, OpenCV |
+| OCR | EasyOCR |
+| HSRP Model | CNN |
+| Streaming | WebSockets |
+\n### 3.2 System Architecture
+- Browser-based frontend with WebRTC camera access
+- Backend AI processing server
+- WebSocket communication for real-time frame streaming
+- AI model inference pipeline
 
-### 3.2 Technology Stack
-- **Frontend**: React / Next.js + Tailwind CSS
-- **Backend**: Django or Node.js
-- **AI Models**: YOLOv8, OpenCV, EasyOCR/PaddleOCR
-- **Database**: PostgreSQL / MongoDB
-- **Video Streaming**: RTSP protocol
-- **Messaging**: WhatsApp API (Twilio or WhatsApp Business API)
-- **Security**: JWT, HTTPS, API Keys
-\n### 3.3 AI Model Components
-- Vehicle detection model (YOLOv8)
-- Number plate detection model (YOLOv8)
-- OCR engine (EasyOCR/PaddleOCR)
-- HSRP classification CNN model
-\n### 3.4 Data Requirements
-- Indian number plate datasets\n- HSRP vs non-HSRP image datasets
-- Traffic CCTV sample videos for testing
+### 3.3 AI Model Components
+- YOLOv8 vehicle detection model
+- YOLOv8 number plate detection model
+- EasyOCR / PaddleOCR engine
+- CNN-based HSRP classification model\n
+### 3.4 Data Requirements
+- Indian number plate datasets
+- HSRP vs non-HSRP image datasets
+- Training data for CNN classifier
 
 ## 4. UI/UX Design Requirements
 
-### 4.1 Design Style
-- Dark mode interface
-- Police-grade dashboard aesthetic
-- CCTV-style layout
-- Animated charts and visualizations
-- Real-time live updates
-- Map-based violation view
+### 4.1 Web Interface Components
+- Live webcam view (main display area)
+- Real-time detection bounding boxes
+- Status panel showing:
+  - Current detection results
+  - Plate number
+  - HSRP status
+  - Confidence score
+- Detection log panel (scrollable list)
+- Screenshot capture button
+- Camera device selector
+- Start/Stop detection controls
 
-### 4.2 Key Interface Components
-- Multi-camera live feed grid
-- Violation alert panel
-- Vehicle detail cards with images
-- Search and filter controls
-- Statistical charts and graphs
-- Geographic heatmap
-- Export and reporting tools
+### 4.2 Design Style
+- Clean AI camera interface
+- Real-time visual feedback
+- Color-coded status indicators:\n  - Green for Valid HSRP
+  - Red for Non-HSRP
+- Smooth animations for detection overlays
+- Responsive layout\n
+### 4.3 Visual Elements
+- Bounding boxes with color coding
+- Overlay text with high contrast
+- Detection confidence bar
+- Timestamp display
+- Live FPS counter
 
-## 5. Database Schema
+## 5. Performance Requirements
 
-### 5.1 Core Data Entities
-- Vehicles (number, owner, phone, RC/Insurance/PUC expiry, HSRP status)
-- Violations (plate number, timestamp, location, image, rule, fine amount, status)
-- Cameras (location, RTSP URL, status)
-- Users (role, credentials, permissions)
-- Payments (violation ID, amount, status, timestamp)
-- Logs (access records, system events)
+### 5.1 Real-Time Processing
+- Frame processing rate: 10-15 FPS
+- Low latency detection (< 200ms per frame)
+- Smooth camera feed display
+- Instant overlay updates
 
-## 6. Deployment Requirements
+### 5.2 Accuracy Requirements
+- Vehicle detection accuracy: > 90%
+- Number plate recognition accuracy: > 85%
+- HSRP classification accuracy: > 90%
+\n## 6. System Behavior
 
-### 6.1 System Output
-- Deployment-ready frontend UI
-- Backend APIs with documentation
-- Integrated AI models
-- Complete database schema
-- Security configurations
-- API key management system
+### 6.1 User Workflow
+1. User opens web application
+2. Grant camera access permission
+3. Point laptop camera at vehicle number plate
+4. AI instantly detects and analyzes plate
+5. View real-time results with overlay
+6. Optionally capture screenshot
+7. Review detection log
 
-### 6.2 Performance Requirements
-- Real-time video processing capability
-- Support for multiple concurrent camera streams
-- Low-latency violation detection
-- Scalable architecture for Smart City deployment
+### 6.2 Detection Logic
+- Continuous frame analysis
+- Automatic vehicle and plate detection
+- Instant HSRP classification
+- Real-time overlay rendering
+- Automatic log entry creation
 
-## 7. Compliance & Legal\n
-### 7.1 Data Protection
-- Encrypted storage of personal information
-- Secure API communications
-- Audit trail for all data access
-- Compliance with data protection regulations
+## 7. Final Deliverable
 
-### 7.2 Operational Logging
-- Complete system access logs
-- Violation processing logs
-- API request/response logs
-- User activity tracking
+A fully working real-time webcam AI application that:
+- Detects number plates from laptop camera
+- Reads vehicle number using OCR
+- Identifies HSRP compliance status
+- Works instantly with live camera feed
+- Provides visual feedback with bounding boxes and overlays
+- Maintains detection log\n- Supports screenshot capture
+
+## 8. Goal Statement
+
+The system should behave like: **Point your laptop camera at a vehicle plate → AI instantly tells you if it is a legal HSRP or not.**

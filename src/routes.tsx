@@ -1,5 +1,6 @@
 import DashboardPage from './pages/DashboardPage';
 import LiveFeedsPage from './pages/LiveFeedsPage';
+import LiveHSRPDetectionPage from './pages/LiveHSRPDetectionPage';
 import ViolationsPage from './pages/ViolationsPage';
 import VehiclesPage from './pages/VehiclesPage';
 import CamerasPage from './pages/CamerasPage';
@@ -25,6 +26,11 @@ const routes: RouteConfig[] = [
     name: 'Live Feeds',
     path: '/live-feeds',
     element: <LiveFeedsPage />,
+  },
+  {
+    name: 'Live HSRP Detection',
+    path: '/live-detection',
+    element: <LiveHSRPDetectionPage />,
   },
   {
     name: 'Violations',
